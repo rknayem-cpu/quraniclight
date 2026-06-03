@@ -1,17 +1,32 @@
-import {connectDB} from "@/lib/db";
+import { connectDB } from "@/lib/db";
 import Other from "@/models/other";
 import Link from "next/link";
 import { FaArrowLeft, FaRegStickyNote, FaCalendarAlt, FaBookmark } from "react-icons/fa";
 
-async function SinglePostPage({ params }) {
+// পোস্ট ডাটার জন্য টাইপ ডিফাইন করা
+interface Post {
+  _id: string;
+  title: string;
+  content: string;
+  category: string;
+  imgUrl?: string;
+  note?: string;
+  createdAt: Date;
+}
+
+interface SinglePostPageProps {
+  params: Promise<{ category: string; id: string }>;
+}
+
+async function SinglePostPage({ params }: SinglePostPageProps) {
   const resolvedParams = await params;
   const { category, id } = resolvedParams;
 
-  let post = null;
+  let post: Post | null = null;
   try {
     await connectDB();
-    // আইডি দিয়ে সিঙ্গেল পোস্ট খোঁজা হচ্ছে
-    post = await Other.findById(id);
+    // lean() ব্যবহার করা হয়েছে পারফরম্যান্স এবং টাইপ সাশ্রয়ী অবজেক্ট পাওয়ার জন্য
+    post = await Other.findById(id).lean<Post>();
   } catch (error) {
     console.error("পোস্টটি খুঁজে পাওয়া যায়নি:", error);
   }
@@ -19,7 +34,7 @@ async function SinglePostPage({ params }) {
   if (!post) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 font-bold text-slate-950">
-        দুঃখিত, পোস্টটি পাওয়া যায়নি অথবা ডিলেট করা হয়েছে।
+        দুঃখিত, পোস্টটি পাওয়া যায়নি অথবা ডিলেট করা হয়েছে।
       </div>
     );
   }
@@ -57,7 +72,7 @@ async function SinglePostPage({ params }) {
           {post.title}
         </h1>
 
-        {/* Featured Image (If exists) */}
+        {/* Featured Image */}
         {post.imgUrl && (
           <div className="w-full max-h-[380px] overflow-hidden rounded-2xl border border-slate-100 mb-8 shadow-sm">
             <img src={post.imgUrl} alt={post.title} className="w-full h-full object-cover" />
@@ -65,7 +80,7 @@ async function SinglePostPage({ params }) {
         )}
 
         {/* Main Content Body */}
-        <div  className="text-slate-950 text-base md:text-xl  leading-relaxed whitespace-pre-line border-l-4 border-emerald-800 pl-4 md:pl-6 mb-8 text-justify">
+        <div className="text-slate-950 text-base md:text-xl leading-relaxed whitespace-pre-line border-l-4 border-emerald-800 pl-4 md:pl-6 mb-8 text-justify">
           {post.content}
         </div>
 
@@ -80,7 +95,6 @@ async function SinglePostPage({ params }) {
             </p>
           </div>
         )}
-
       </div>
     </div>
   );

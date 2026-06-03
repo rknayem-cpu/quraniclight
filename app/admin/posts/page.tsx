@@ -4,20 +4,30 @@ import axios from "axios";
 import Link from "next/link";
 import { Search, Trash2, Edit3, Loader2 } from "lucide-react";
 
-export default function ManagePosts() {
-  const [posts, setPosts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(true);
+// পোস্ট ডাটার টাইপ ডিফাইন করা হলো
+interface Post {
+  _id: string;
+  title: string;
+  category: string;
+  content: string;
+  imgUrl?: string;
+  note?: string;
+}
 
-  // পোস্ট লোড করা
+export default function ManagePosts() {
+  // useState-এ টাইপ অ্যাসাইন করা হলো
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
+
   useEffect(() => {
     fetchPosts();
   }, []);
 
-  const fetchPosts = async () => {
+  const fetchPosts = async (): Promise<void> => {
     try {
       setLoading(true);
-      const res = await axios.get("/api/posts");
+      const res = await axios.get<Post[]>("/api/posts");
       setPosts(res.data);
     } catch (error) {
       console.error("Error fetching posts:", error);
@@ -26,15 +36,13 @@ export default function ManagePosts() {
     }
   };
 
-  // ডিলিট ফাংশন
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: string): Promise<void> => {
     if (window.confirm("আপনি কি নিশ্চিত এই পোস্টটি ডিলিট করতে চান?")) {
       try {
         await axios.delete(`/api/posts/${id}`);
-        // লোকালি লিস্ট আপডেট করা
-        setPosts(posts.filter(post => post._id !== id));
+        setPosts((prev) => prev.filter((post) => post._id !== id));
       } catch (error) {
-        alert("ডিলিট করতে সমস্যা হয়েছে!");
+        alert("ডিলিট করতে সমস্যা হয়েছে!");
       }
     }
   };
@@ -49,24 +57,22 @@ export default function ManagePosts() {
       <h1 className="text-3xl font-black text-slate-900 mb-2">পোস্ট ম্যানেজমেন্ট</h1>
       <p className="text-slate-500 font-bold mb-8">সবগুলো পোস্ট এখান থেকে সার্চ, এডিট বা ডিলিট করুন।</p>
 
-      {/* সার্চ বক্স */}
       <div className="relative mb-8">
         <Search className="absolute left-4 top-4 text-slate-400" />
         <input
           type="text"
           placeholder="টাইটেল লিখে সার্চ করুন..."
           className="w-full p-4 pl-12 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none font-bold bg-white shadow-sm"
+          value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      {/* লোডিং স্টেট */}
       {loading ? (
         <div className="flex justify-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
         </div>
       ) : (
-        /* পোস্ট লিস্ট */
         <div className="space-y-4">
           {filteredPosts.length > 0 ? (
             filteredPosts.map((post) => (

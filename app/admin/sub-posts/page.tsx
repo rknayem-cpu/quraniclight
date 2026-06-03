@@ -4,69 +4,73 @@ import axios from "axios";
 import Link from "next/link";
 import { Search, Trash2, Edit3, Loader2 } from "lucide-react";
 
-export default function ManagePosts() {
-  const [posts, setPosts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(true);
+// সাব-পোস্ট ডাটার জন্য টাইপ ডিফাইন
+interface SubPost {
+  _id: string;
+  title: string;
+  category: string;
+  content: string;
+  imgUrl?: string;
+  note?: string;
+}
 
-  // পোস্ট লোড করা
+export default function ManageSubPosts() {
+  const [posts, setPosts] = useState<SubPost[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
+
   useEffect(() => {
-    fetchPosts();
+    fetchSubPosts();
   }, []);
 
-  const fetchPosts = async () => {
+  const fetchSubPosts = async (): Promise<void> => {
     try {
       setLoading(true);
-      const res = await axios.get("/api/sub-posts");
+      const res = await axios.get<SubPost[]>("/api/sub-posts");
       setPosts(res.data);
     } catch (error) {
-      console.error("Error fetching posts:", error);
+      console.error("Error fetching sub-posts:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // ডিলিট ফাংশন
-  const handleDelete = async (id) => {
-    if (window.confirm("আপনি কি নিশ্চিত এই পোস্টটি ডিলিট করতে চান?")) {
+  const handleDelete = async (id: string): Promise<void> => {
+    if (window.confirm("আপনি কি নিশ্চিত এই সাব-পোস্টটি ডিলিট করতে চান?")) {
       try {
         await axios.delete(`/api/sub-posts/${id}`);
-        // লোকালি লিস্ট আপডেট করা
-        setPosts(posts.filter(post => post._id !== id));
+        setPosts((prev) => prev.filter((post) => post._id !== id));
       } catch (error) {
-        alert("ডিলিট করতে সমস্যা হয়েছে!");
+        alert("ডিলিট করতে সমস্যা হয়েছে!");
       }
     }
   };
 
-  // সার্চ লজিক
   const filteredPosts = posts.filter((post) =>
     post.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="max-w-4xl mx-auto p-6 font-sans">
-      <h1 className="text-3xl font-black text-slate-900 mb-2">পোস্ট ম্যানেজমেন্ট</h1>
-      <p className="text-slate-500 font-bold mb-8">সবগুলো পোস্ট এখান থেকে সার্চ, এডিট বা ডিলিট করুন।</p>
+      <h1 className="text-3xl font-black text-slate-900 mb-2">সাব-পোস্ট ম্যানেজমেন্ট</h1>
+      <p className="text-slate-500 font-bold mb-8">সবগুলো সাব-পোস্ট এখান থেকে সার্চ, এডিট বা ডিলিট করুন।</p>
 
-      {/* সার্চ বক্স */}
       <div className="relative mb-8">
         <Search className="absolute left-4 top-4 text-slate-400" />
         <input
           type="text"
           placeholder="টাইটেল লিখে সার্চ করুন..."
           className="w-full p-4 pl-12 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none font-bold bg-white shadow-sm"
+          value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      {/* লোডিং স্টেট */}
       {loading ? (
         <div className="flex justify-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
         </div>
       ) : (
-        /* পোস্ট লিস্ট */
         <div className="space-y-4">
           {filteredPosts.length > 0 ? (
             filteredPosts.map((post) => (
@@ -98,7 +102,7 @@ export default function ManagePosts() {
               </div>
             ))
           ) : (
-            <div className="text-center py-10 font-bold text-slate-500">কোনো পোস্ট পাওয়া যায়নি।</div>
+            <div className="text-center py-10 font-bold text-slate-500">কোনো সাব-পোস্ট পাওয়া যায়নি।</div>
           )}
         </div>
       )}
