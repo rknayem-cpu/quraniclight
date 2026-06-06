@@ -9,7 +9,7 @@
 }
 
 @font-face {
-  font-family: 'Kalpurush',sans-serif;
+  font-family: 'kalpurush',sans-serif;
   src: url("/fonts/kalpurush.ttf") format("truetype");
     
 }
@@ -20,14 +20,8 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
-  font-family: 'Kalpurush', sans-serif;
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  font-family: 'kalpurush', sans-serif;
+  
 }
 
 * {

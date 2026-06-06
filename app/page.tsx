@@ -5,7 +5,7 @@ export default function Home() {
   const router = useRouter();
   
   return (
-    <main className="min-h-screen font-['Kalpurush'] bg-[#f8fafc] text-slate-900 selection:bg-emerald-200">
+    <main className="min-h-screen font-['kalpurush'] bg-[#f8fafc] text-slate-900 selection:bg-emerald-200">
       
       {/* Dynamic Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
